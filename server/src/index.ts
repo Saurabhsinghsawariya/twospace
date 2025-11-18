@@ -8,6 +8,7 @@ import morgan from "morgan";
 import { Server } from "socket.io";
 import connectDB from "./config/db";
 import errorHandler from "./middleware/errorHandler";
+import adminRoutes from "./routes/admin.routes";
 import authRoutes from "./routes/auth.routes";
 import chatRoutes from "./routes/chat.routes";
 import coupleRoutes from "./routes/couple.routes";
@@ -54,6 +55,7 @@ app.use("/api/couple", coupleRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/memories", memoryRoutes); 
 app.use("/api/diary", diaryRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.use(errorHandler);
 

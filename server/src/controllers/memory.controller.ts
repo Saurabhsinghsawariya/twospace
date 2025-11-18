@@ -2,9 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import stream from "stream";
 import cloudinary from "../config/cloudinary";
 import Memory from "../models/Memory";
+import { getIO } from "../socket"; // <--- Import this
 
-// @desc    Upload a new Photo (Stream Method)
-// @route   POST /api/memories/upload
 export const uploadMemory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.file) {
@@ -15,7 +14,6 @@ export const uploadMemory = async (req: Request, res: Response, next: NextFuncti
     // @ts-ignore
     const user = req.user;
 
-    // Create a Promise to handle the stream upload
     const uploadStream = () => {
       return new Promise((resolve, reject) => {
         const theStream = cloudinary.uploader.upload_stream(
@@ -25,7 +23,6 @@ export const uploadMemory = async (req: Request, res: Response, next: NextFuncti
             resolve(result);
           }
         );
-        // Pipe the buffer to Cloudinary
         const bufferStream = new stream.PassThrough();
         // @ts-ignore
         bufferStream.end(req.file.buffer);
@@ -33,10 +30,8 @@ export const uploadMemory = async (req: Request, res: Response, next: NextFuncti
       });
     };
 
-    // Await the upload
     const result: any = await uploadStream();
 
-    // Save to DB
     const newMemory = await Memory.create({
       coupleId: user.coupleId,
       uploaderId: user._id,
@@ -44,15 +39,20 @@ export const uploadMemory = async (req: Request, res: Response, next: NextFuncti
       publicId: result.public_id,
     });
 
+    // 🔔 NOTIFY EVERYONE IN THE COUPLE
+    try {
+        getIO().to(user.coupleId.toString()).emit("refreshMemories");
+    } catch (e) {
+        console.error("Socket emit failed", e);
+    }
+
     res.status(201).json(newMemory);
   } catch (error) {
-    console.error("❌ Upload Error:", error); // This will print specific errors if it fails
+    console.error("Upload Error:", error);
     next(error);
   }
 };
 
-// @desc    Get All Memories
-// @route   GET /api/memories
 export const getMemories = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // @ts-ignore

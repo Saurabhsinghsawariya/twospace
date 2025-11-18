@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  # 🧠 BACKEND
+  server:
+    build: ./server
+    container_name: twospace-server
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./server/.env # Reads your existing server .env
+    environment:
+      - PORT=8000
+      # Override Mongo URI to point to the docker container (optional)
+      # Or keep using Atlas if you prefer.
+      # - MONGODB_URI=mongodb://mongo:27017/twospace
+    depends_on:
+      - mongo
+    volumes:
+      # Hot Reloading for Development
+      - ./server/src:/app/src
+      - /app/node_modules
+
+  # 🎨 FRONTEND
+  client:
+    build: ./client
+    container_name: twospace-client
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./client/.env.local # Reads your existing client .env
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    volumes:
+      # Hot Reloading for Development
+      - ./client/src:/app/src
+      - ./client/public:/app/public
+      - /app/node_modules
+
+  # 🍃 DATABASE (Local MongoDB)
+  # This is optional. If you use Atlas, this just sits here doing nothing.
+  mongo:
+    image: mongo:latest
+    container_name: twospace-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

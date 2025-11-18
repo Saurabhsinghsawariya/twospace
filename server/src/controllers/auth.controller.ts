@@ -12,7 +12,8 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
     const result = RegisterSchema.safeParse(req.body);
     if (!result.success) {
       res.status(400);
-      throw new Error(result.error.errors[0].message);
+      // 🛠 FIX: Use 'issues' instead of 'errors' to satisfy TypeScript
+      throw new Error(result.error.issues[0].message);
     }
 
     const { name, email, password } = result.data;
@@ -59,7 +60,8 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     const result = LoginSchema.safeParse(req.body);
     if (!result.success) {
       res.status(400);
-      throw new Error("Invalid input");
+      // 🛠 FIX: Use 'issues' instead of 'errors' here too
+      throw new Error(result.error.issues[0].message);
     }
 
     const { email, password } = result.data;
