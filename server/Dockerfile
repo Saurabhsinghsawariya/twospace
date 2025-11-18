@@ -1,6 +1,6 @@
 # server/Dockerfile
 
-# 1. Use Node 18 Alpine (Lightweight)
+# 1. Use Node 20 Alpine (Lightweight)
 FROM node:20-alpine
 
 # 2. Set working directory
@@ -15,11 +15,15 @@ RUN npm install
 # 5. Copy source code
 COPY . .
 
-# 6. Build TypeScript
+# 6. FIX: Grant execution permission to the tsc binary
+# This resolves the 'Permission denied' error during the build phase.
+RUN chmod +x $(npm bin)/tsc
+
+# 7. Build TypeScript
 RUN npm run build
 
-# 7. Expose the port
+# 8. Expose the port
 EXPOSE 8000
 
-# 8. Start command
+# 9. Start command
 CMD ["npm", "start"]
