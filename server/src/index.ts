@@ -29,7 +29,10 @@ app.use(helmet());
 app.use(morgan("dev"));
 
 const corsOptions = {
-  origin: process.env.CLIENT_URL || "http://localhost:3000",
+  origin: [
+    "http://localhost:3000",
+    "https://twospace-ldh2h876w-saurabh-singhs-projects-d3507bc7.vercel.app"
+  ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
