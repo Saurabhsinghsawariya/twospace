@@ -16,8 +16,9 @@ RUN npm install
 COPY . .
 
 # 6. FIX: Grant execution permission to the tsc binary
+# The issue was using $(npm bin). We use the direct path: node_modules/.bin/tsc
 # This resolves the 'Permission denied' error during the build phase.
-RUN chmod +x $(npm bin)/tsc
+RUN chmod +x ./node_modules/.bin/tsc
 
 # 7. Build TypeScript
 RUN npm run build
